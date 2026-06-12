@@ -1,0 +1,13 @@
+### Inserir usuário
+POST http://localhost:8080/usuario
+Content-Type: application/json
+
+{
+  "cpf": 42399304802,
+  "email": "lucas.almeidacosta09@gmail.com",
+  "nome": "Lucas Almeida",
+  "senhaHash": "lucasalmeida",
+  "telefone": "987736246",
+  "endereco": "rua almeida 23444"
+}
+
