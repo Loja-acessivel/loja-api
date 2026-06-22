@@ -36,5 +36,10 @@ public class UsuarioController {
         return ResponseEntity.ok(listaUsuarios);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluirUsuario(@PathVariable Long id){
+        serviceUser.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
 
 }

@@ -28,4 +28,8 @@ public class UsuarioService {
         return mapper.toResponseList(usuario);
     }
 
+    public void deletar(Long id){
+        Usuario usuario = repo.findById(id).orElseThrow(() -> new EntityNotFoundException("pinto"));
+        repo.delete(usuario);
+    }
 }
