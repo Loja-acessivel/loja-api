@@ -5,8 +5,11 @@ import br.com.apiloja.Dto.UsuarioResponseDTO;
 import br.com.apiloja.Mapper.UsuarioMapper;
 import br.com.apiloja.Model.Usuario;
 import br.com.apiloja.Repository.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -17,7 +20,12 @@ public class UsuarioService {
     public UsuarioResponseDTO inserir(UsuarioRequestDTO dto){
         Usuario user = mapper.toEntity(dto);
         repo.save(user);
-
         return mapper.toResponse(user);
     }
+
+    public List<UsuarioResponseDTO> buscarTodos(){
+        List<Usuario> usuario = repo.findAll();
+        return mapper.toResponseList(usuario);
+    }
+
 }
