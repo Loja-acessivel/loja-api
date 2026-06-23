@@ -18,7 +18,7 @@ public class Usuario {
     private String nome;
     private String email;
     @Column(name = "senha_hash")
-    private String senhaHash;
+    private String senha;
     private String cpf;
     private String telefone;
     private String endereco;
@@ -29,11 +29,11 @@ public class Usuario {
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
 
-    public Usuario(Long id, String nome, String email, String senhaHash, String cpf, String telefone, String endereco, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+    public Usuario(Long id, String nome, String email, String senha, String cpf, String telefone, String endereco, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.nome = nome;
         this.email = email;
-        this.senhaHash = senhaHash;
+        this.senha = senha;
         this.cpf = cpf;
         this.telefone = telefone;
         this.endereco = endereco;
@@ -65,12 +65,12 @@ public class Usuario {
         this.email = email;
     }
 
-    public String getSenhaHash() {
-        return senhaHash;
+    public String getSenha() {
+        return senha;
     }
 
-    public void setSenhaHash(String senhaHash) {
-        this.senhaHash = senhaHash;
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 
     public String getCpf() {
