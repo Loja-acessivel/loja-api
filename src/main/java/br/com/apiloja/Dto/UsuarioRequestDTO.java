@@ -13,7 +13,7 @@ public class UsuarioRequestDTO {
     private String cpf;
     private  String email;
     private String nome;
-    private String senhaHash;
+    private String senha;
     private String telefone;
     private String endereco;
 

@@ -29,7 +29,21 @@ public class UsuarioService {
     }
 
     public void deletar(Long id){
-        Usuario usuario = repo.findById(id).orElseThrow(() -> new EntityNotFoundException("pinto"));
+        Usuario usuario = repo.findById(id).orElseThrow(() -> new EntityNotFoundException(""));
         repo.delete(usuario);
+    }
+
+    public UsuarioResponseDTO atualizar(Long id,UsuarioRequestDTO dto){
+        Usuario usuario = repo.findById(id).orElseThrow(() -> new EntityNotFoundException(""));
+
+        usuario.setCpf(dto.getCpf());
+        usuario.setNome(dto.getNome());
+        usuario.setEndereco(dto.getEndereco());
+        usuario.setSenha(dto.getSenha());
+        usuario.setEmail(dto.getEmail());
+        usuario.setTelefone(dto.getTelefone());
+
+        repo.save(usuario);
+        return mapper.toResponse(usuario);
     }
 }

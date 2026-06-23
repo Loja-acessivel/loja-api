@@ -27,7 +27,7 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity<UsuarioResponseDTO> inserirUsuario(@RequestBody UsuarioRequestDTO dto){
         UsuarioResponseDTO userRespose = serviceUser.inserir(dto);
-        return ResponseEntity.ok(userRespose);
+        return ResponseEntity.status(201).body(userRespose);
     }
 
     @GetMapping
@@ -40,6 +40,11 @@ public class UsuarioController {
     public ResponseEntity<Void> excluirUsuario(@PathVariable Long id){
         serviceUser.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@PathVariable Long id,@RequestBody UsuarioRequestDTO dto){
+        UsuarioResponseDTO userRespose = serviceUser.atualizar(id, dto);
+        return ResponseEntity.status(201).body(userRespose);
     }
 
 }
