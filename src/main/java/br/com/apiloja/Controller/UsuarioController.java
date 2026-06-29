@@ -2,7 +2,6 @@ package br.com.apiloja.Controller;
 
 import br.com.apiloja.Dto.UsuarioRequestDTO;
 import br.com.apiloja.Dto.UsuarioResponseDTO;
-import br.com.apiloja.Service.ProdutoService;
 import br.com.apiloja.Service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +35,7 @@ public class UsuarioController {
         return ResponseEntity.ok(listaUsuarios);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> buscarUsuarioPorId(@PathVariable Long id){
         UsuarioResponseDTO usuario = serviceUser.buscarPorId(id);
         return  ResponseEntity.ok(usuario);
