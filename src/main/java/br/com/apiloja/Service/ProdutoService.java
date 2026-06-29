@@ -2,8 +2,10 @@ package br.com.apiloja.Service;
 
 import br.com.apiloja.Dto.Produto.ProdutoRequestDTO;
 import br.com.apiloja.Dto.Produto.ProdutoResponseDTO;
+import br.com.apiloja.Dto.Vendedor.VendedorResponseDTO;
 import br.com.apiloja.Mapper.ProdutoMapper;
 import br.com.apiloja.Model.Produto;
+import br.com.apiloja.Model.Vendedor;
 import br.com.apiloja.Repository.ProdutoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,11 @@ public class ProdutoService {
     public List<ProdutoResponseDTO> buscarTodos(){
         List<Produto> produtos = repo.findAll();
         return mapper.toResponseList(produtos);
+    }
+
+    public ProdutoResponseDTO buscarPorId(Long id){
+        Produto produtos = repo.findById(id).orElseThrow(() -> new EntityNotFoundException("Vendedor não encontrado com o ID: " + id));;
+        return mapper.toResponse(produtos);
     }
 
     public void deletar(Long id){
