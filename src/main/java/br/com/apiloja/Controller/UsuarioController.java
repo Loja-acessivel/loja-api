@@ -36,6 +36,12 @@ public class UsuarioController {
         return ResponseEntity.ok(listaUsuarios);
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<UsuarioResponseDTO> buscarUsuarioPorId(@PathVariable Long id){
+        UsuarioResponseDTO usuario = serviceUser.buscarPorId(id);
+        return  ResponseEntity.ok(usuario);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirUsuario(@PathVariable Long id){
         serviceUser.deletar(id);

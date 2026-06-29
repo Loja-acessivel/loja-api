@@ -2,8 +2,10 @@ package br.com.apiloja.Service;
 
 import br.com.apiloja.Dto.UsuarioRequestDTO;
 import br.com.apiloja.Dto.UsuarioResponseDTO;
+import br.com.apiloja.Dto.Vendedor.VendedorResponseDTO;
 import br.com.apiloja.Mapper.UsuarioMapper;
 import br.com.apiloja.Model.Usuario;
+import br.com.apiloja.Model.Vendedor;
 import br.com.apiloja.Repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,10 @@ public class UsuarioService {
     public List<UsuarioResponseDTO> buscarTodos(){
         List<Usuario> usuario = repo.findAll();
         return mapper.toResponseList(usuario);
+    }
+    public UsuarioResponseDTO buscarPorId(Long id){
+        Usuario usuario = repo.findById(id).orElseThrow(() -> new EntityNotFoundException("Vendedor não encontrado com o ID: " + id));;
+        return mapper.toResponse(usuario);
     }
 
     public void deletar(Long id){
