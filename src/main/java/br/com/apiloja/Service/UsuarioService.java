@@ -1,11 +1,9 @@
 package br.com.apiloja.Service;
 
-import br.com.apiloja.Dto.UsuarioRequestDTO;
-import br.com.apiloja.Dto.UsuarioResponseDTO;
-import br.com.apiloja.Dto.Vendedor.VendedorResponseDTO;
+import br.com.apiloja.Dto.Usuario.UsuarioRequestDTO;
+import br.com.apiloja.Dto.Usuario.UsuarioResponseDTO;
 import br.com.apiloja.Mapper.UsuarioMapper;
 import br.com.apiloja.Model.Usuario;
-import br.com.apiloja.Model.Vendedor;
 import br.com.apiloja.Repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

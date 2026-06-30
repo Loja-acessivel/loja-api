@@ -1,7 +1,6 @@
-package br.com.apiloja.Dto;
+package br.com.apiloja.Dto.Usuario;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
 import lombok.*;
 
 
