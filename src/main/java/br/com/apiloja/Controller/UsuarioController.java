@@ -1,7 +1,7 @@
 package br.com.apiloja.Controller;
 
-import br.com.apiloja.Dto.UsuarioRequestDTO;
-import br.com.apiloja.Dto.UsuarioResponseDTO;
+import br.com.apiloja.Dto.Usuario.UsuarioRequestDTO;
+import br.com.apiloja.Dto.Usuario.UsuarioResponseDTO;
 import br.com.apiloja.Service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

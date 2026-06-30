@@ -1,11 +1,6 @@
-package br.com.apiloja.Dto;
+package br.com.apiloja.Dto.Usuario;
 
-import jakarta.persistence.Column;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 /*é o que o usuario envia*/
 @Data
