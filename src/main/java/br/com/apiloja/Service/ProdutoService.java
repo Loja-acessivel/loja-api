@@ -32,7 +32,7 @@ public class ProdutoService {
     }
 
     public ProdutoResponseDTO buscarPorId(Long id){
-        Produto produtos = repo.findById(id).orElseThrow(() -> new EntityNotFoundException("Vendedor não encontrado com o ID: " + id));;
+        Produto produtos = repo.findById(id).orElseThrow(() -> new EntityNotFoundException("Produto não encontrado com o ID: " + id));
         return mapper.toResponse(produtos);
     }
 
