@@ -16,7 +16,7 @@ import java.util.UUID;
 @Getter @Setter
 public class Produto {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long vendedorId;
     private String nome;

@@ -16,4 +16,6 @@ public class ProdutoRequestDTO {
     private Integer estoque;
 
     private String categoria;
+    
+    private Long vendedorId;
 }

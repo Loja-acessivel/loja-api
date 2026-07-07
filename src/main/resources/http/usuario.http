@@ -1,13 +1,13 @@
 ### Inserir usuário
-POST http://localhost:8080/usuario
+POST http://localhost:8080/produto
 Content-Type: application/json
 
 {
-  "cpf": 42399304802,
-  "email": "lucas.almeidacosta09@gmail.com",
-  "nome": "Lucas Almeida",
-  "senhaHash": "lucasalmeida",
-  "telefone": "987736246",
-  "endereco": "rua almeida 23444"
+  "nome": "Tênis de Corrida",
+  "categoria": "Calçados",
+  "descricao": "Tênis super confortável para corrida",
+  "preco": 299.90,
+  "estoque": 15,
+  "vendedorId": 1
 }
 
