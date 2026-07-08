@@ -1,0 +1,10 @@
+POST http://localhost:8080/vendedor
+Content-Type: application/json
+
+{
+  "nome": "Lucas Costa",
+  "email": "lucas.costa@exemplo.com",
+  "senha": "SenhaSegura123!",
+  "cpfCnpj": "12345678901",
+  "telefone": "11999998888"
+}

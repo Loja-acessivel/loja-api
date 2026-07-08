@@ -19,6 +19,8 @@ public class CarrinhoService {
 
     public CarrinhoResponseDTO inserir(CarrinhoRequestDTO dto){
         Carrinho carrinho = mapper.toEntity(dto);
+        carrinho.setCriadoEm(java.time.LocalDateTime.now());
+        carrinho.setAtualizadoEm(java.time.LocalDateTime.now());
         repo.save(carrinho);
         return mapper.toResponse(carrinho);
     }
@@ -39,7 +41,7 @@ public class CarrinhoService {
     public CarrinhoResponseDTO atualizar(Long id, CarrinhoRequestDTO dto) {
         Carrinho carrinho = repo.findById(id).orElseThrow(() -> new EntityNotFoundException("Carrinho não encontrado com o ID: " + id));
         carrinho.setStatus(dto.getStatus());
-
+        carrinho.setAtualizadoEm(java.time.LocalDateTime.now());
         repo.save(carrinho);
         return mapper.toResponse(carrinho);
     }

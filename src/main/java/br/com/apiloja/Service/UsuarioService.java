@@ -19,6 +19,8 @@ public class UsuarioService {
 
     public UsuarioResponseDTO inserir(UsuarioRequestDTO dto){
         Usuario user = mapper.toEntity(dto);
+        user.setCriadoEm(java.time.LocalDateTime.now());
+        user.setAtualizadoEm(java.time.LocalDateTime.now());
         repo.save(user);
         return mapper.toResponse(user);
     }
@@ -46,6 +48,7 @@ public class UsuarioService {
         usuario.setSenha(dto.getSenha());
         usuario.setEmail(dto.getEmail());
         usuario.setTelefone(dto.getTelefone());
+        usuario.setAtualizadoEm(java.time.LocalDateTime.now());
 
         repo.save(usuario);
         return mapper.toResponse(usuario);

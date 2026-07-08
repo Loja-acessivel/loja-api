@@ -20,6 +20,11 @@ public class VendedorService {
 
     public VendedorResponseDTO inserir(VendedorRequestDTO dto){
         Vendedor vend = mapper.toEntity(dto);
+        vend.setCriadoEm(java.time.LocalDateTime.now());
+        vend.setAtualizadoEm(java.time.LocalDateTime.now());
+        if (vend.getStatus() == null) {
+            vend.setStatus("ativo");
+        }
         repo.save(vend);
         return mapper.toResponse(vend);
     }
@@ -50,6 +55,7 @@ public class VendedorService {
         vendedor.setCpfCnpj(dto.getCpfCnpj());
         vendedor.setTelefone(dto.getTelefone());
         vendedor.setAvaliacao(dto.getAvaliacao());
+        vendedor.setAtualizadoEm(java.time.LocalDateTime.now());
         repo.save(vendedor);
         return mapper.toResponse(vendedor);
     }
