@@ -21,6 +21,13 @@ public class ProdutoService {
 
     public ProdutoResponseDTO inserir(ProdutoRequestDTO prod){
         Produto produto = mapper.toEntity(prod);
+        produto.setVendedorId(prod.getVendedorId());
+        // 2. Define um status padrão se necessário antes de salvar
+        if (produto.getStatus() == null) {
+            produto.setStatus("disponivel");
+        }
+        produto.setCriadoEm(java.time.LocalDateTime.now());
+        produto.setAtualizadoEm(java.time.LocalDateTime.now());
         repo.save(produto);
         return mapper.toResponse(produto);
     }
