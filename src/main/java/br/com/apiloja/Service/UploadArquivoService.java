@@ -39,4 +39,21 @@ public class UploadArquivoService {
             throw new RuntimeException("Erro ao salvar a imagem do produto", e);
         }
     }
+    public void excluirArquivo(String urlImagem) {
+        try {
+            // 1. Extrai o nome do arquivo a partir da URL salva no banco
+            // Exemplo: se a URL for "http://localhost:8080/imagens/123-foto.jpg", pega "123-foto.jpg"
+            String nomeArquivo = urlImagem.substring(urlImagem.lastIndexOf("/") + 1);
+
+            // 2. Localiza o caminho completo do arquivo
+            Path caminhoCompleto = Paths.get(DIRETORIO_IMAGENS + nomeArquivo);
+
+            // 3. Verifica se existe e deleta do disco
+            Files.deleteIfExists(caminhoCompleto);
+
+        } catch (IOException e) {
+            // Lança uma exceção ou apenas loga para não travar a aplicação caso o arquivo já tenha sido apagado manualmente
+            System.err.println("Erro ao tentar excluir o arquivo do disco: " + e.getMessage());
+        }
+    }
 }
