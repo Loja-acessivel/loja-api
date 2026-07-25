@@ -1,59 +1,65 @@
 package br.com.apiloja.Service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.File;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
+import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class UploadArquivoService {
 
-    // Define uma pasta no seu computador para guardar as imagens de teste
-    private final String DIRETORIO_IMAGENS = "C:/Users/lucascosta-ieg/OneDrive - Instituto J&F/Área de Trabalho/loja-api";
+    private final Cloudinary cloudinary;
 
-    public String salvarArquivo(MultipartFile arquivo) {
+    public UploadResultado salvarArquivo(MultipartFile arquivo) {
+        validarImagem(arquivo);
+
         try {
-            // Cria a pasta caso ela não exista
-            File pasta = new File(DIRETORIO_IMAGENS);
-            if (!pasta.exists()) {
-                pasta.mkdirs();
-            }
+            Map<?, ?> resultado = cloudinary.uploader().upload(
+                    arquivo.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "loja/produtos",
+                            "resource_type", "image",
+                            "unique_filename", true
+                    )
+            );
 
-            // Gera um nome único para o arquivo não sobrescrever outro com o mesmo nome
-            String nomeOriginal = arquivo.getOriginalFilename();
-            String extensao = nomeOriginal.substring(nomeOriginal.lastIndexOf("."));
-            String nomeUnico = UUID.randomUUID().toString() + extensao;
-
-            // Salva o arquivo na pasta
-            Path caminhoCompleto = Paths.get(DIRETORIO_IMAGENS + nomeUnico);
-            Files.write(caminhoCompleto, arquivo.getBytes());
-
-            // Retorna o "link" simula o link que iria para o banco
-            return "http://localhost:8080/imagens/" + nomeUnico;
-
+            return new UploadResultado(
+                    resultado.get("secure_url").toString(),
+                    resultado.get("public_id").toString()
+            );
         } catch (IOException e) {
-            throw new RuntimeException("Erro ao salvar a imagem do produto", e);
+            throw new RuntimeException("Erro ao enviar a imagem para o Cloudinary", e);
         }
     }
-    public void excluirArquivo(String urlImagem) {
+
+    public void excluirArquivo(String publicId) {
+        if (publicId == null || publicId.isBlank()) {
+            return;
+        }
+
         try {
-            // 1. Extrai o nome do arquivo a partir da URL salva no banco
-            // Exemplo: se a URL for "http://localhost:8080/imagens/123-foto.jpg", pega "123-foto.jpg"
-            String nomeArquivo = urlImagem.substring(urlImagem.lastIndexOf("/") + 1);
-
-            // 2. Localiza o caminho completo do arquivo
-            Path caminhoCompleto = Paths.get(DIRETORIO_IMAGENS + nomeArquivo);
-
-            // 3. Verifica se existe e deleta do disco
-            Files.deleteIfExists(caminhoCompleto);
-
+            cloudinary.uploader().destroy(
+                    publicId,
+                    ObjectUtils.asMap("resource_type", "image", "invalidate", true)
+            );
         } catch (IOException e) {
-            // Lança uma exceção ou apenas loga para não travar a aplicação caso o arquivo já tenha sido apagado manualmente
-            System.err.println("Erro ao tentar excluir o arquivo do disco: " + e.getMessage());
+            throw new RuntimeException("Erro ao excluir a imagem do Cloudinary", e);
+        }
+    }
+
+    private void validarImagem(MultipartFile arquivo) {
+        if (arquivo == null || arquivo.isEmpty()) {
+            throw new IllegalArgumentException("A imagem é obrigatória");
+        }
+
+        String contentType = arquivo.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("O arquivo enviado deve ser uma imagem");
         }
     }
 }

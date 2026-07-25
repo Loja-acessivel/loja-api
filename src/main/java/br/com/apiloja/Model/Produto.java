@@ -6,8 +6,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ public class Produto {
     private Long vendedorId;
     private String nome;
     private String descricao;
+    @JdbcTypeCode(SqlTypes.NUMERIC)
     private Double preco;
     private Integer estoque;
     private String categoria;

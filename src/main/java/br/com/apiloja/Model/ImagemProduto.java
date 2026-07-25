@@ -22,6 +22,9 @@ public class ImagemProduto {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String url;
 
+    @Column(name = "cloudinary_public_id", nullable = false, unique = true)
+    private String cloudinaryPublicId;
+
     @Column(nullable = false)
     private Short ordem = 0;
 
@@ -33,10 +36,12 @@ public class ImagemProduto {
     private LocalDateTime criadoEm;
 
     // Construtor completo
-    public ImagemProduto(Long id, Produto produto, String url, Short ordem, Boolean principal, LocalDateTime criadoEm) {
+    public ImagemProduto(Long id, Produto produto, String url, String cloudinaryPublicId,
+                         Short ordem, Boolean principal, LocalDateTime criadoEm) {
         this.id = id;
         this.produto = produto;
         this.url = url;
+        this.cloudinaryPublicId = cloudinaryPublicId;
         this.ordem = ordem;
         this.principal = principal;
         this.criadoEm = criadoEm;
@@ -64,6 +69,14 @@ public class ImagemProduto {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getCloudinaryPublicId() {
+        return cloudinaryPublicId;
+    }
+
+    public void setCloudinaryPublicId(String cloudinaryPublicId) {
+        this.cloudinaryPublicId = cloudinaryPublicId;
     }
 
     public Short getOrdem() {
