@@ -2,7 +2,6 @@ package br.com.apiloja.Service;
 
 import br.com.apiloja.Dto.ImagemProduto.ImagemProdutoRequestDTO;
 import br.com.apiloja.Dto.ImagemProduto.ImagemProdutoResponseDTO;
-import br.com.apiloja.Dto.Produto.ProdutoResponseDTO;
 import br.com.apiloja.Mapper.ImagemProdutoMapper;
 import br.com.apiloja.Model.ImagemProduto;
 import br.com.apiloja.Model.Produto;
@@ -12,8 +11,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,48 +24,49 @@ public class ImagemProdutoService {
     private final UploadArquivoService uploadService;
     private final ImagemProdutoMapper mapper;
 
+    @Transactional
     public ImagemProdutoResponseDTO vincularImagemAoProduto(ImagemProdutoRequestDTO dto) {
-        ImagemProduto novaImagem = mapper.toEntity(dto);
         Produto produto = produtoRepo.findById(dto.getProdutoId())
                 .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado"));
 
-        // 2. Faz o upload físico e pega a URL externa
-        String urlImagem = uploadService.salvarArquivo(dto.getFoto());
+        if (Boolean.TRUE.equals(dto.getPrincipal())) {
+            imagemRepo.findByProdutoIdAndPrincipalTrue(dto.getProdutoId()).ifPresent(imagemPrincipal -> {
+                imagemPrincipal.setPrincipal(false);
+                imagemRepo.saveAndFlush(imagemPrincipal);
+            });
+        }
 
-        // 3. Monta o objeto para salvar no banco de dados
-        novaImagem.setProduto(produto);
-        novaImagem.setUrl(urlImagem);
-        novaImagem.setCriadoEm(java.time.LocalDateTime.now());
+        UploadResultado upload = uploadService.salvarArquivo(dto.getFoto());
 
-        // 4. Salva no banco
-        imagemRepo.save(novaImagem);
-        return mapper.toResponse(novaImagem);
+        try {
+            ImagemProduto novaImagem = mapper.toEntity(dto);
+            novaImagem.setProduto(produto);
+            novaImagem.setUrl(upload.url());
+            novaImagem.setCloudinaryPublicId(upload.publicId());
+            novaImagem.setCriadoEm(LocalDateTime.now());
+
+            return mapper.toResponse(imagemRepo.save(novaImagem));
+        } catch (RuntimeException erroPersistencia) {
+            try {
+                uploadService.excluirArquivo(upload.publicId());
+            } catch (RuntimeException erroLimpeza) {
+                erroPersistencia.addSuppressed(erroLimpeza);
+            }
+            throw erroPersistencia;
+        }
     }
 
     @Transactional
     public void excluirImagem(Long id) {
-        // 1. Busca os detalhes da imagem antes de apagar
         ImagemProduto imagem = imagemRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Imagem do produto não encontrada com o ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Imagem do produto não encontrada com o ID: " + id));
 
-        // 2. Apaga o arquivo físico do computador/servidor usando a URL salva
-        // (Será necessário criar esse método auxiliar no seu UploadArquivoService)
-        uploadService.excluirArquivo(imagem.getUrl());
-
-        // 3. Deleta o registro do banco de dados
+        uploadService.excluirArquivo(imagem.getCloudinaryPublicId());
         imagemRepo.delete(imagem);
     }
 
-
-    public List<ImagemProdutoResponseDTO> buscarTodos(){
-        List<ImagemProduto> ImagemProdutos = imagemRepo.findAll();
-        return mapper.toResponseList(ImagemProdutos);
-    }
-
-    public List<ImagemProdutoResponseDTO> buscarPorProduto(Long produtoId){
-        List<ImagemProduto> imagens = imagemRepo.findByProdutoId(produtoId);
-
-        // 3. Converte toda a lista de Entity para ResponseDTO usando o seu BaseMapper
-        return mapper.toResponseList(imagens);
+    public List<ImagemProdutoResponseDTO> buscarPorProduto(Long produtoId) {
+        return mapper.toResponseList(imagemRepo.findByProdutoId(produtoId));
     }
 }

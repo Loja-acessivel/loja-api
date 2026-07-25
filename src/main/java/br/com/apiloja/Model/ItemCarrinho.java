@@ -8,6 +8,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "item_carrinho")
@@ -27,12 +29,14 @@ public class ItemCarrinho {
     @Column(nullable = false)
     private Integer quantidade;
 
-    @Column(name = "preco_unitario", nullable = false, precision = 12, scale = 2)
+    @Column(name = "preco_unitario", nullable = false, columnDefinition = "NUMERIC(12,2)")
+    @JdbcTypeCode(SqlTypes.NUMERIC)
     private double precoUnitario;
 
     // Coluna gerada/calculada pelo banco de dados (subtotal)
     // insertable = false e updatable = false para o JPA não tentar salvar nem alterar esse valor via Java
-    @Column(insertable = false, updatable = false, precision = 12, scale = 2)
+    @Column(insertable = false, updatable = false, columnDefinition = "NUMERIC(12,2)")
+    @JdbcTypeCode(SqlTypes.NUMERIC)
     private double subtotal;
 
     // Construtor sem argumentos
