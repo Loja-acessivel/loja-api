@@ -16,7 +16,7 @@ public class ProdutoResponseDTO {
     private Long vendedorId;
     private String nome;
     private String descricao;
-    private Double preco;
+    private BigDecimal preco;
     private Integer estoque;
     private String categoria;
     private String status;
@@ -28,7 +28,7 @@ public class ProdutoResponseDTO {
     private LocalDateTime atualizadoEm;
     
     public ProdutoResponseDTO(Long id, Long vendedorId, String nome, String descricao,
-                              Double preco, Integer estoque, String categoria,
+                              BigDecimal preco, Integer estoque, String categoria,
                               String status, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.vendedorId = vendedorId;

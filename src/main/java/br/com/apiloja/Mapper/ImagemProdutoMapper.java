@@ -12,6 +12,8 @@ public interface ImagemProdutoMapper extends BaseMapper<ImagemProdutoRequestDTO,
     @Override
     @Mapping(target = "produto.id", source = "produtoId")
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "url", ignore = true)
+    @Mapping(target = "cloudinaryPublicId", ignore = true)
     @Mapping(target = "criadoEm", ignore = true)
     ImagemProduto toEntity(ImagemProdutoRequestDTO dto);
 

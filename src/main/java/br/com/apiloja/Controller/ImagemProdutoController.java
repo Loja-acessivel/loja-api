@@ -25,9 +25,9 @@ public class ImagemProdutoController {
      * Isso permite que o Spring extraia o arquivo binário (MultipartFile) e os dados simples (produtoId, ordem, etc) juntos.
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadImagem(@ModelAttribute ImagemProdutoRequestDTO dto) {
-        imagemService.vincularImagemAoProduto(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Imagem vinculada com sucesso!");
+    public ResponseEntity<ImagemProdutoResponseDTO> uploadImagem(@ModelAttribute ImagemProdutoRequestDTO dto) {
+        ImagemProdutoResponseDTO imagem = imagemService.vincularImagemAoProduto(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(imagem);
     }
 
     /**

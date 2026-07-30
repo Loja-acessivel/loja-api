@@ -24,7 +24,7 @@ public class Carrinho {
     @Column(nullable = false, length = 20)
     private String status = "aberto";
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal total = BigDecimal.ZERO;
 
     @CreationTimestamp
