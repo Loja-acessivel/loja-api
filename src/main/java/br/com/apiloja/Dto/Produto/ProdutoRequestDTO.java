@@ -11,7 +11,7 @@ public class ProdutoRequestDTO {
 
     private String descricao;
 
-    private Double preco;
+    private BigDecimal preco;
 
     private Integer estoque;
 

@@ -9,6 +9,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "item_carrinho")
 @Getter @Setter
@@ -28,18 +30,19 @@ public class ItemCarrinho {
     private Integer quantidade;
 
     @Column(name = "preco_unitario", nullable = false, precision = 12, scale = 2)
-    private double precoUnitario;
+    private BigDecimal precoUnitario;
 
     // Coluna gerada/calculada pelo banco de dados (subtotal)
     // insertable = false e updatable = false para o JPA não tentar salvar nem alterar esse valor via Java
     @Column(insertable = false, updatable = false, precision = 12, scale = 2)
-    private double subtotal;
+    private BigDecimal subtotal;
 
     // Construtor sem argumentos
     public ItemCarrinho() {}
 
     // Construtor completo
-    public ItemCarrinho(Long id, Long carrinhoId, Long produtoId, Integer quantidade, double precoUnitario, double subtotal) {
+    public ItemCarrinho(Long id, Long carrinhoId, Long produtoId, Integer quantidade,
+                        BigDecimal precoUnitario, BigDecimal subtotal) {
         this.id = id;
         this.carrinhoId = carrinhoId;
         this.produtoId = produtoId;
@@ -81,19 +84,19 @@ public class ItemCarrinho {
         this.quantidade = quantidade;
     }
 
-    public double getPrecoUnitario() {
+    public BigDecimal getPrecoUnitario() {
         return precoUnitario;
     }
 
-    public void setPrecoUnitario(double precoUnitario) {
+    public void setPrecoUnitario(BigDecimal precoUnitario) {
         this.precoUnitario = precoUnitario;
     }
 
-    public double getSubtotal() {
+    public BigDecimal getSubtotal() {
         return subtotal;
     }
 
-    public void setSubtotal(double subtotal) {
+    public void setSubtotal(BigDecimal subtotal) {
         this.subtotal = subtotal;
     }
 }

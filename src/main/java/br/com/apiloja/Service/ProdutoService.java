@@ -4,10 +4,12 @@ import br.com.apiloja.Dto.Produto.ProdutoRequestDTO;
 import br.com.apiloja.Dto.Produto.ProdutoResponseDTO;
 import br.com.apiloja.Dto.Vendedor.VendedorResponseDTO;
 import br.com.apiloja.Mapper.ProdutoMapper;
+import br.com.apiloja.Model.ImagemProduto;
 import br.com.apiloja.Model.Produto;
-import br.com.apiloja.Model.Vendedor;
+import br.com.apiloja.Repository.ImagemProdutoRepository;
 import br.com.apiloja.Repository.ProdutoRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.util.List;
 @Service
 public class ProdutoService {
     private final ProdutoRepository repo;
+    private final ImagemProdutoRepository imagemRepo;
+    private final UploadArquivoService uploadService;
     private final ProdutoMapper mapper;
 
     public ProdutoResponseDTO inserir(ProdutoRequestDTO prod){
@@ -43,8 +47,14 @@ public class ProdutoService {
         return mapper.toResponse(produtos);
     }
 
+    @Transactional
     public void deletar(Long id){
-        Produto produto = repo.findById(id).orElseThrow(() -> new EntityNotFoundException(""));
+        Produto produto = repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Produto não encontrado com o ID: " + id));
+        List<ImagemProduto> imagens = imagemRepo.findByProdutoId(id);
+        imagens.forEach(imagem -> uploadService.excluirArquivo(imagem.getCloudinaryPublicId()));
+        imagemRepo.deleteAll(imagens);
         repo.delete(produto);
     }
 
@@ -56,6 +66,8 @@ public class ProdutoService {
         produto.setDescricao(dto.getDescricao());
         produto.setPreco(dto.getPreco());
         produto.setEstoque(dto.getEstoque());
+        produto.setVendedorId(dto.getVendedorId());
+        produto.setAtualizadoEm(java.time.LocalDateTime.now());
 
         repo.save(produto);
         return mapper.toResponse(produto);

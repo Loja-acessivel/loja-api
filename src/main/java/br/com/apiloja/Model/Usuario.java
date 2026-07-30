@@ -17,7 +17,7 @@ public class Usuario {
     private Long id;
     private String nome;
     private String email;
-    @Column(name = "senha_hash")
+    @Column(name = "senha", nullable = false, columnDefinition = "TEXT")
     private String senha;
     private String cpf;
     private String telefone;
