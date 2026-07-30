@@ -38,6 +38,12 @@ public class ImagemProdutoController {
         List<ImagemProdutoResponseDTO> imagens = imagemService.buscarPorProduto(produtoId);
         return ResponseEntity.ok(imagens);
     }
+
+    @PatchMapping("/{id}/principal")
+    public ResponseEntity<ImagemProdutoResponseDTO> definirComoPrincipal(@PathVariable Long id) {
+        return ResponseEntity.ok(imagemService.definirComoPrincipal(id));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirImagem(@PathVariable Long id) {
         imagemService.excluirImagem(id);

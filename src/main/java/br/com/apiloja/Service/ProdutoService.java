@@ -52,7 +52,7 @@ public class ProdutoService {
         Produto produto = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Produto não encontrado com o ID: " + id));
-        List<ImagemProduto> imagens = imagemRepo.findByProdutoId(id);
+        List<ImagemProduto> imagens = imagemRepo.findByProdutoIdOrderByOrdemAscIdAsc(id);
         imagens.forEach(imagem -> uploadService.excluirArquivo(imagem.getCloudinaryPublicId()));
         imagemRepo.deleteAll(imagens);
         repo.delete(produto);
