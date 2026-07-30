@@ -62,8 +62,38 @@ public class ImagemProdutoService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Imagem do produto não encontrada com o ID: " + id));
 
+        Long produtoId = imagem.getProduto().getId();
+        boolean eraPrincipal = Boolean.TRUE.equals(imagem.getPrincipal());
+
         uploadService.excluirArquivo(imagem.getCloudinaryPublicId());
         imagemRepo.delete(imagem);
+        imagemRepo.flush();
+
+        if (eraPrincipal) {
+            List<ImagemProduto> restantes = imagemRepo.findByProdutoIdOrderByOrdemAscIdAsc(produtoId);
+            if (!restantes.isEmpty()) {
+                ImagemProduto novaPrincipal = restantes.get(0);
+                novaPrincipal.setPrincipal(true);
+                imagemRepo.save(novaPrincipal);
+            }
+        }
+    }
+
+    @Transactional
+    public ImagemProdutoResponseDTO definirComoPrincipal(Long id) {
+        ImagemProduto selecionada = imagemRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Imagem do produto não encontrada com o ID: " + id));
+
+        imagemRepo.findByProdutoIdAndPrincipalTrue(selecionada.getProduto().getId())
+                .filter(principalAtual -> !principalAtual.getId().equals(id))
+                .ifPresent(principalAtual -> {
+                    principalAtual.setPrincipal(false);
+                    imagemRepo.saveAndFlush(principalAtual);
+                });
+
+        selecionada.setPrincipal(true);
+        return mapper.toResponse(imagemRepo.save(selecionada));
     }
 
     public List<ImagemProdutoResponseDTO> buscarTodos() {
@@ -71,6 +101,6 @@ public class ImagemProdutoService {
     }
 
     public List<ImagemProdutoResponseDTO> buscarPorProduto(Long produtoId) {
-        return mapper.toResponseList(imagemRepo.findByProdutoId(produtoId));
+        return mapper.toResponseList(imagemRepo.findByProdutoIdOrderByOrdemAscIdAsc(produtoId));
     }
 }

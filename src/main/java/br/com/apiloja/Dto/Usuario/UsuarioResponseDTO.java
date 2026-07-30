@@ -11,7 +11,6 @@ public class UsuarioResponseDTO {
     private Long id;
     private String nome;
     private String email;
-    private String senha;
     private String cpf;
     private String telefone;
     private String endereco;
@@ -20,11 +19,10 @@ public class UsuarioResponseDTO {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss",timezone = "America/Sao_Paulo")
     private LocalDateTime atualizadoEm;
 
-    public UsuarioResponseDTO(Long id, String nome, String email, String senha, String cpf, String telefone, String endereco, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+    public UsuarioResponseDTO(Long id, String nome, String email, String cpf, String telefone, String endereco, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.nome = nome;
         this.email = email;
-        this.senha= senha;
         this.cpf = cpf;
         this.telefone = telefone;
         this.endereco = endereco;
