@@ -6,20 +6,19 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @AllArgsConstructor
 public class PedidoResponseDTO {
     private Long id;
-    private Long usuarioId;
-    private String compradorNome;
-    private String compradorEmail;
+    private Long compradorId;
+    private Long produtoId;
     private String status;
     private BigDecimal total;
 
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "America/Sao_Paulo")
     private LocalDateTime criadoEm;
 
-    private List<ItemPedidoResponseDTO> itens;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "America/Sao_Paulo")
+    private LocalDateTime atualizadoEm;
 }

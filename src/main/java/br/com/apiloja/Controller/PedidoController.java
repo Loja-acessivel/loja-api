@@ -23,7 +23,7 @@ public class PedidoController {
     private final PedidoService pedidoService;
 
     @PostMapping
-    public ResponseEntity<PedidoResponseDTO> criar(@RequestBody PedidoRequestDTO dto) {
+    public ResponseEntity<List<PedidoResponseDTO>> criar(@RequestBody PedidoRequestDTO dto) {
         return ResponseEntity.status(201).body(pedidoService.criar(dto));
     }
 
