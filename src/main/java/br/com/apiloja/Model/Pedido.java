@@ -22,14 +22,11 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "usuario_id", nullable = false)
-    private Long usuarioId;
+    @Column(name = "comprador_id", nullable = false)
+    private Long compradorId;
 
-    @Column(name = "comprador_nome", nullable = false, length = 100)
-    private String compradorNome;
-
-    @Column(name = "comprador_email", nullable = false, length = 150)
-    private String compradorEmail;
+    @Column(name = "produto_id", nullable = false)
+    private Long produtoId;
 
     @Column(nullable = false, length = 20)
     private String status;

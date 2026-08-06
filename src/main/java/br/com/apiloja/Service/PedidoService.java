@@ -1,15 +1,12 @@
 package br.com.apiloja.Service;
 
 import br.com.apiloja.Dto.Pedido.ItemPedidoRequestDTO;
-import br.com.apiloja.Dto.Pedido.ItemPedidoResponseDTO;
 import br.com.apiloja.Dto.Pedido.PedidoRequestDTO;
 import br.com.apiloja.Dto.Pedido.PedidoResponseDTO;
 import br.com.apiloja.Dto.Pedido.PedidoVendedorResponseDTO;
-import br.com.apiloja.Model.ItemPedido;
 import br.com.apiloja.Model.Pedido;
 import br.com.apiloja.Model.Produto;
 import br.com.apiloja.Model.Usuario;
-import br.com.apiloja.Repository.ItemPedidoRepository;
 import br.com.apiloja.Repository.PedidoRepository;
 import br.com.apiloja.Repository.ProdutoRepository;
 import br.com.apiloja.Repository.UsuarioRepository;
@@ -19,34 +16,34 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PedidoService {
 
     private final PedidoRepository pedidoRepo;
-    private final ItemPedidoRepository itemPedidoRepo;
     private final ProdutoRepository produtoRepo;
     private final UsuarioRepository usuarioRepo;
     private final VendedorRepository vendedorRepo;
 
     @Transactional
-    public PedidoResponseDTO criar(PedidoRequestDTO dto) {
+    public List<PedidoResponseDTO> criar(PedidoRequestDTO dto) {
         validarPedido(dto);
 
-        Usuario usuario = usuarioRepo.findById(dto.getUsuarioId())
+        Usuario comprador = usuarioRepo.findById(dto.getCompradorId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Usuário não encontrado com o ID: " + dto.getUsuarioId()));
+                        "Comprador não encontrado com o ID: " + dto.getCompradorId()));
 
         Map<Long, Integer> quantidadesPorProduto = agruparQuantidades(dto.getItens());
-        List<ItemPedido> itens = new ArrayList<>();
-        BigDecimal total = BigDecimal.ZERO;
+        List<Pedido> linhasDoPedido = new ArrayList<>();
+        LocalDateTime agora = LocalDateTime.now();
 
         for (Map.Entry<Long, Integer> entrada : quantidadesPorProduto.entrySet()) {
             Produto produto = produtoRepo.findById(entrada.getKey())
@@ -54,44 +51,23 @@ public class PedidoService {
                             "Produto não encontrado com o ID: " + entrada.getKey()));
             int quantidade = entrada.getValue();
 
-            if (!"disponivel".equalsIgnoreCase(produto.getStatus()) || produto.getEstoque() <= 0) {
-                throw new IllegalArgumentException(
-                        "O produto " + produto.getNome() + " não está disponível.");
-            }
-            if (quantidade > produto.getEstoque()) {
-                throw new IllegalArgumentException(
-                        "A quantidade solicitada de " + produto.getNome() + " ultrapassa o estoque disponível.");
-            }
+            validarDisponibilidade(produto, quantidade);
 
-            BigDecimal subtotal = produto.getPreco().multiply(BigDecimal.valueOf(quantidade));
-            total = total.add(subtotal);
-
-            ItemPedido item = new ItemPedido();
-            item.setProdutoId(produto.getId());
-            item.setVendedorId(produto.getVendedorId());
-            item.setProdutoNome(produto.getNome());
-            item.setQuantidade(quantidade);
-            item.setPrecoUnitario(produto.getPreco());
-            item.setSubtotal(subtotal);
-            itens.add(item);
+            for (int unidade = 0; unidade < quantidade; unidade += 1) {
+                Pedido pedido = new Pedido();
+                pedido.setCompradorId(comprador.getId());
+                pedido.setProdutoId(produto.getId());
+                pedido.setStatus("recebido");
+                pedido.setTotal(produto.getPreco());
+                pedido.setCriadoEm(agora);
+                pedido.setAtualizadoEm(agora);
+                linhasDoPedido.add(pedido);
+            }
         }
 
-        LocalDateTime agora = LocalDateTime.now();
-        Pedido pedido = new Pedido();
-        pedido.setUsuarioId(usuario.getId());
-        pedido.setCompradorNome(usuario.getNome());
-        pedido.setCompradorEmail(usuario.getEmail());
-        pedido.setStatus("recebido");
-        pedido.setTotal(total);
-        pedido.setCriadoEm(agora);
-        pedido.setAtualizadoEm(agora);
-        pedido = pedidoRepo.save(pedido);
-
-        Long pedidoId = pedido.getId();
-        itens.forEach(item -> item.setPedidoId(pedidoId));
-        itens = itemPedidoRepo.saveAll(itens);
-
-        return paraResponse(pedido, itens);
+        return pedidoRepo.saveAll(linhasDoPedido).stream()
+                .map(this::paraResponse)
+                .toList();
     }
 
     public List<PedidoVendedorResponseDTO> buscarPorVendedor(Long vendedorId) {
@@ -99,40 +75,32 @@ public class PedidoService {
             throw new EntityNotFoundException("Vendedor não encontrado com o ID: " + vendedorId);
         }
 
-        List<ItemPedido> itensDoVendedor =
-                itemPedidoRepo.findByVendedorIdOrderByPedidoIdDescIdAsc(vendedorId);
-        Map<Long, List<ItemPedido>> itensPorPedido = new LinkedHashMap<>();
-        itensDoVendedor.forEach(item ->
-                itensPorPedido.computeIfAbsent(item.getPedidoId(), chave -> new ArrayList<>()).add(item));
+        List<Produto> produtosDoVendedor = produtoRepo.findByVendedorId(vendedorId);
+        if (produtosDoVendedor.isEmpty()) {
+            return List.of();
+        }
 
-        return itensPorPedido.entrySet().stream()
-                .map(entrada -> {
-                    Pedido pedido = pedidoRepo.findById(entrada.getKey())
-                            .orElseThrow(() -> new EntityNotFoundException(
-                                    "Pedido não encontrado com o ID: " + entrada.getKey()));
-                    List<ItemPedidoResponseDTO> itens = entrada.getValue().stream()
-                            .map(this::paraItemResponse)
-                            .toList();
-                    BigDecimal subtotalVendedor = entrada.getValue().stream()
-                            .map(ItemPedido::getSubtotal)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Map<Long, Produto> produtosPorId = produtosDoVendedor.stream()
+                .collect(Collectors.toMap(Produto::getId, Function.identity()));
+        List<Pedido> pedidos = pedidoRepo.findByProdutoIdInOrderByCriadoEmDescIdDesc(
+                produtosPorId.keySet());
 
-                    return new PedidoVendedorResponseDTO(
-                            pedido.getId(),
-                            pedido.getCompradorNome(),
-                            pedido.getCompradorEmail(),
-                            pedido.getStatus(),
-                            subtotalVendedor,
-                            pedido.getCriadoEm(),
-                            itens
-                    );
-                })
+        Map<Long, Usuario> compradoresPorId = usuarioRepo.findAllById(
+                        pedidos.stream().map(Pedido::getCompradorId).collect(Collectors.toSet()))
+                .stream()
+                .collect(Collectors.toMap(Usuario::getId, Function.identity()));
+
+        return pedidos.stream()
+                .map(pedido -> paraVendedorResponse(
+                        pedido,
+                        compradoresPorId.get(pedido.getCompradorId()),
+                        produtosPorId.get(pedido.getProdutoId())))
                 .toList();
     }
 
     private void validarPedido(PedidoRequestDTO dto) {
-        if (dto == null || dto.getUsuarioId() == null) {
-            throw new IllegalArgumentException("O usuarioId é obrigatório.");
+        if (dto == null || dto.getCompradorId() == null) {
+            throw new IllegalArgumentException("O compradorId é obrigatório.");
         }
         if (dto.getItens() == null || dto.getItens().isEmpty()) {
             throw new IllegalArgumentException("O pedido deve possuir pelo menos um item.");
@@ -154,28 +122,57 @@ public class PedidoService {
         return agrupados;
     }
 
-    private PedidoResponseDTO paraResponse(Pedido pedido, List<ItemPedido> itens) {
+    private void validarDisponibilidade(Produto produto, int quantidade) {
+        if (!"disponivel".equalsIgnoreCase(produto.getStatus()) || produto.getEstoque() <= 0) {
+            throw new IllegalArgumentException(
+                    "O produto " + produto.getNome() + " não está disponível.");
+        }
+        if (quantidade > produto.getEstoque()) {
+            throw new IllegalArgumentException(
+                    "A quantidade solicitada de " + produto.getNome()
+                            + " ultrapassa o estoque disponível.");
+        }
+    }
+
+    private PedidoResponseDTO paraResponse(Pedido pedido) {
         return new PedidoResponseDTO(
                 pedido.getId(),
-                pedido.getUsuarioId(),
-                pedido.getCompradorNome(),
-                pedido.getCompradorEmail(),
+                pedido.getCompradorId(),
+                pedido.getProdutoId(),
                 pedido.getStatus(),
                 pedido.getTotal(),
                 pedido.getCriadoEm(),
-                itens.stream().map(this::paraItemResponse).toList()
+                pedido.getAtualizadoEm()
         );
     }
 
-    private ItemPedidoResponseDTO paraItemResponse(ItemPedido item) {
-        return new ItemPedidoResponseDTO(
-                item.getId(),
-                item.getProdutoId(),
-                item.getVendedorId(),
-                item.getProdutoNome(),
-                item.getQuantidade(),
-                item.getPrecoUnitario(),
-                item.getSubtotal()
+    private PedidoVendedorResponseDTO paraVendedorResponse(
+            Pedido pedido,
+            Usuario comprador,
+            Produto produto
+    ) {
+        if (comprador == null) {
+            throw new EntityNotFoundException(
+                    "Comprador não encontrado com o ID: " + pedido.getCompradorId());
+        }
+        if (produto == null) {
+            throw new EntityNotFoundException(
+                    "Produto não encontrado com o ID: " + pedido.getProdutoId());
+        }
+
+        return new PedidoVendedorResponseDTO(
+                pedido.getId(),
+                comprador.getId(),
+                comprador.getNome(),
+                comprador.getEmail(),
+                comprador.getTelefone(),
+                comprador.getEndereco(),
+                produto.getId(),
+                produto.getNome(),
+                pedido.getStatus(),
+                pedido.getTotal(),
+                pedido.getCriadoEm(),
+                pedido.getAtualizadoEm()
         );
     }
 }
